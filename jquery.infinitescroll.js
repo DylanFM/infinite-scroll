@@ -484,7 +484,7 @@
             var instance = this,
             opts = instance.options,
             path = opts.path,
-            box, frag, desturl, method, condition,
+            box, frag, desturl, method, xhrData, condition,
             pageNum = pageNum || null,
             getPage = (!!pageNum) ? pageNum : opts.state.currPage;
             beginAjax = function infscr_ajax(opts) {
@@ -507,7 +507,14 @@
                         case 'html+callback':
 
                             instance._debug('Using HTML via .load() method');
-                        box.load(desturl + ' ' + opts.itemSelector, null, function infscr_ajax_callback(responseText) {
+                            if (opts.xhrData) {
+                              if ($.isPlainObject(opts.xhrData) || typeof opts.xhrData === 'string') {
+                                xhrData = opts.xhrData;
+                              } else if ($.isFunction(opts.xhrData)) {
+                                xhrData = opts.xhrData(instance);
+                              }
+                            }
+                        box.load(desturl + ' ' + opts.itemSelector, xhrData, function infscr_ajax_callback(responseText) {
                             instance._loadcallback(box, responseText);
                         });
 
@@ -526,6 +533,7 @@
                         });
 
                         break;
+
                         case 'json':
                             instance._debug('Using ' + (method.toUpperCase()) + ' via $.ajax() method');
                         $.ajax({
